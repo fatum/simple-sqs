@@ -20,13 +20,15 @@ module Simple
         subscribe_to_messages(pool, &block)
 
         trap "INT" do
+          p "Receive INT signal. Shutting down pool..."
+
           Thread.new do
             @cache[:shutdown] = true
 
+            pool.shutdown
             (@poller_threads || []).map(&:exit)
 
-            pool.shutdown
-
+            p "All done. Exit..."
             Process.exit(0)
           end
         end
@@ -60,6 +62,8 @@ module Simple
                    end
                   end
                 end
+
+              sleep 0.1
             end
           end
         end
