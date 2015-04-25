@@ -15,7 +15,7 @@ module Simple
       end
 
       def execute(&block)
-        pool = Thread.pool @options[:worker_size]
+        pool = Thread.pool 1, @options[:worker_size]
 
         subscribe_to_messages(pool, &block)
 
