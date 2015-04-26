@@ -34,6 +34,18 @@ worker.execute do |message|
 end
 ```
 
+## Features
+
+* Low memory footprint
+* Pure thread-based implementation without sleep (mutex with cond var) and without celluloid
+* Cross platform
+* Pool with auto shrinking idle thread
+* Multiple poller
+
+## TODO
+
+* Batch messages
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/console` for an interactive prompt that will allow you to experiment.

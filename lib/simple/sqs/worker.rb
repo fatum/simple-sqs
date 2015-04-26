@@ -1,6 +1,5 @@
 require 'thread/pool'
 require 'thread/channel'
-require 'thread_safe'
 
 require 'aws-sdk'
 
@@ -11,7 +10,6 @@ module Simple
     class Worker
       def initialize(options)
         @options = {poller_size: 1}.merge(options)
-        @cache = ThreadSafe::Cache.new
       end
 
       def execute(&block)
@@ -23,7 +21,7 @@ module Simple
           p "Receive INT signal. Shutting down pool..."
 
           Thread.new do
-            @cache[:shutdown] = true
+            @shutdown = true
 
             pool.shutdown
             (@poller_threads || []).map(&:exit)
@@ -44,15 +42,15 @@ module Simple
         @poller_threads = @options[:poller_size].times.map do
           Thread.new do
             loop do
-              break if @cache[:shutdown]
+              break if @shutdown
 
               queue.receive_message(limit: 10).
                 each do |message|
-                  break if @cache[:shutdown]
+                  break if @shutdown
 
                   pool.process do
                     begin
-                      unless @cache[:shutdown]
+                      unless @shutdown
                         yield message
                         message.delete
                       end
