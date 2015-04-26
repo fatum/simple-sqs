@@ -39,8 +39,8 @@ end
 * Low memory footprint
 * Pure thread-based implementation without sleep (mutex with cond var) and without celluloid
 * Cross platform
-* Pool with auto shrinking idle thread
-* Multiple poller
+* Pool with auto shrinking idle threads
+* Multiple pollers
 
 ## TODO
 
