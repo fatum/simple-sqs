@@ -17,17 +17,19 @@ module Simple
 
         subscribe_to_messages(pool, &block)
 
-        trap "INT" do
-          p "Receive INT signal. Shutting down pool..."
+        %w(SIGTERM INT).each do |signal|
+          trap signal do
+            p "Receive #{signal} signal. Shutting down pool..."
 
-          Thread.new do
-            @shutdown = true
+            Thread.new do
+              @shutdown = true
 
-            pool.shutdown
-            (@poller_threads || []).map(&:exit)
+              pool.shutdown
+              (@poller_threads || []).map(&:exit)
 
-            p "All done. Exit..."
-            Process.exit(0)
+              p "All done. Exit..."
+              Process.exit(0)
+            end
           end
         end
 
