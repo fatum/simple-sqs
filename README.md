@@ -41,6 +41,7 @@ end
 * Cross platform
 * Pool with auto shrinking idle threads
 * Multiple pollers
+* Trap signals (can be running by upstart)
 
 ## TODO
 
