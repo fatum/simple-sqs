@@ -46,7 +46,7 @@ module Simple
             loop do
               break if @shutdown
 
-              queue.receive_message(limit: 10).
+              queue.receive_message(limit: 10, wait_time_seconds: 20).
                 each do |message|
                   break if @shutdown
 
