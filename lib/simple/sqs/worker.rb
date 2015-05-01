@@ -70,7 +70,7 @@ module Simple
       end
 
       def queue
-        AWS::SQS.new.queues.named(@options[:queue])
+        @queue ||= AWS::SQS.new.queues.named(@options[:queue])
       end
     end
   end
