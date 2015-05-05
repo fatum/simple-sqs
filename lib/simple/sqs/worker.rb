@@ -9,7 +9,14 @@ module Simple
   module Sqs
     class Worker
       def initialize(options)
-        @options = {poller_size: 1}.merge(options)
+        @options = {
+          limit: 10,
+          wait: false,
+          poller_size: 1,
+          idle_timeout: 20,
+          wait_time_seconds: 20,
+        }.merge(options)
+
         @pool = Thread.pool 1, @options[:worker_size]
       end
 
@@ -33,9 +40,11 @@ module Simple
               break if @shutdown
 
               handle(
-                queue.receive_message(limit: 10, wait_time_seconds: 20),
-                &block
-              )
+                queue.receive_message(
+                  limit: @options[:limit],
+                  wait_time_seconds: @options[:idle_timeout]
+                ),
+                &block)
             end
           end
         end
@@ -59,8 +68,10 @@ module Simple
              end
             end
           end
+
+          @pool.wait if @options[:wait]
         else
-          sleep 20
+          sleep @options[:idle_timeout]
         end
       end
 
