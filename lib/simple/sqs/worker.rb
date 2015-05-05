@@ -33,7 +33,7 @@ module Simple
               break if @shutdown
 
               handle(
-                queue.receive_message(limit: 10, wait_time_seconds: 20, idle_timeout: 20),
+                queue.receive_message(limit: 10, wait_time_seconds: 20),
                 &block
               )
             end
@@ -42,23 +42,25 @@ module Simple
       end
 
       def handle(messages, &block)
-        messages.each do |message|
-          break if @shutdown
+        if messages.any?
+          messages.each do |message|
+            break if @shutdown
 
-          @pool.process do
-            begin
-              unless @shutdown
-                TuneMyGc.processing_started
-                block[message]
-                TuneMyGc.processing_ended
+            @pool.process do
+              begin
+                unless @shutdown
+                  block[message]
 
-                message.delete
-              end
-            rescue StandardError => e
-             p e.message
-             raise e
-           end
+                  message.delete
+                end
+              rescue StandardError => e
+               p e.message
+               raise e
+             end
+            end
           end
+        else
+          sleep 20
         end
       end
 
