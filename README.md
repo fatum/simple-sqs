@@ -45,6 +45,10 @@ end
 
 ## Changelog
 
+v0.2.1
+
+* Fix stopped pooler after idle_timeout
+
 v0.2.0
 
 * Use aws-sdk v2 (with patch for memory leak on ruby 2.2)

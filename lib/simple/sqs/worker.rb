@@ -48,8 +48,10 @@ module Simple
       def subscribe_to_messages(&block)
         @poller_threads = @options[:poller_size].times.map do
           Thread.new do
-            @poller.poll do |messages|
-              handle messages, &block
+            loop do
+              @poller.poll do |messages|
+                handle messages, &block
+              end
             end
           end
         end
