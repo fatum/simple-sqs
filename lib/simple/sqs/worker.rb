@@ -17,7 +17,8 @@ module Simple
           wait_time_seconds: 20,
         }.merge(options)
 
-        @pool = Thread.pool 1, @options[:worker_size]
+        @pool   = Thread.pool 1, @options[:worker_size]
+        @poller = build_poller
       end
 
       def execute(&block)
@@ -31,48 +32,48 @@ module Simple
 
       private
 
-      def subscribe_to_messages(&block)
-        queue = AWS::SQS.new.queues.named(@options[:queue])
+      def build_poller
+        response = Aws::SQS::Client.new.get_queue_url(queue_name: @options[:queue])
 
+        poller_options = {
+          skip_delete: true,
+          max_number_of_messages: @options[:limit],
+          wait_time_seconds:      @options[:wait_time_seconds],
+          idle_timeout:           @options[:idle_timeout]
+        }
+
+        Aws::SQS::QueuePoller.new(response.first[:queue_url], poller_options)
+      end
+
+      def subscribe_to_messages(&block)
         @poller_threads = @options[:poller_size].times.map do
           Thread.new do
-            loop do
-              break if @shutdown
-
-              handle(
-                queue.receive_message(
-                  limit: @options[:limit],
-                  wait_time_seconds: @options[:idle_timeout]
-                ),
-                &block)
+            @poller.poll do |messages|
+              handle messages, &block
             end
           end
         end
       end
 
       def handle(messages, &block)
-        if messages.any?
-          messages.each do |message|
-            break if @shutdown
+        messages.each do |message|
+          break if @shutdown
 
-            @pool.process do
-              begin
-                unless @shutdown
-                  block[message]
+          @pool.process do
+            begin
+              unless @shutdown
+                block[message]
 
-                  message.delete
-                end
-              rescue StandardError => e
-               p e.message
-               raise e
-             end
-            end
+                @poller.delete_messages [message]
+              end
+            rescue StandardError => e
+             p e.message
+             raise e
+           end
           end
-
-          @pool.wait if @options[:wait]
-        else
-          sleep @options[:idle_timeout]
         end
+
+        @pool.wait if @options[:wait]
       end
 
       def trap_signals

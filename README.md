@@ -43,6 +43,13 @@ end
 * Multiple pollers
 * Trap signals (can be running by upstart)
 
+## Changelog
+
+v0.2.0
+
+* Use aws-sdk v2 (with patch for memory leak on ruby 2.2)
+* Really low memory footprint (40mb)
+
 ## TODO
 
 * Batch messages
