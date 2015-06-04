@@ -47,6 +47,10 @@ end
 
 v0.2.1
 
+* Trap TTIN signal in separate thread
+
+v0.2.1
+
 * Fix stopped pooler after idle_timeout
 
 v0.2.0
