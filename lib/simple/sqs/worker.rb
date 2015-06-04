@@ -80,24 +80,26 @@ module Simple
 
       def trap_signals
         trap 'TTIN' do
-          puts "   Thread count: #{Thread.list.count}"
+          Thread.new do
+            puts "   Thread count: #{Thread.list.count}"
 
-          puts "   Thread inspections:"
-          Thread.list.each do |thread|
-            puts "    #{thread.object_id}: #{thread.status}"
+            puts "   Thread inspections:"
+            Thread.list.each do |thread|
+              puts "    #{thread.object_id}: #{thread.status}"
+            end
+
+            puts "   GC stats:"
+            puts GC.stat
+
+            puts "   Object Space:"
+
+            counts = Hash.new{ 0 }
+            ObjectSpace.each_object do |o|
+              counts[o.class] += 1
+            end
+
+            puts counts
           end
-
-          puts "   GC stats:"
-          puts GC.stat
-
-          puts "   Object Space:"
-
-          counts = Hash.new{ 0 }
-          ObjectSpace.each_object do |o|
-            counts[o.class] += 1
-          end
-
-          puts counts
         end
 
         %w(SIGTERM INT).each do |signal|
