@@ -45,7 +45,11 @@ end
 
 ## Changelog
 
-v0.2.1
+v0.2.3
+
+* Upgrade aws-sdk to v2.1
+
+v0.2.2
 
 * Trap TTIN signal in separate thread
 

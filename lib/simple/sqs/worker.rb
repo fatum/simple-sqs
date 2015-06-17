@@ -42,7 +42,7 @@ module Simple
           idle_timeout:           @options[:idle_timeout]
         }
 
-        Aws::SQS::QueuePoller.new(response.first[:queue_url], poller_options)
+        Aws::SQS::QueuePoller.new(response.queue_url, poller_options)
       end
 
       def subscribe_to_messages(&block)
