@@ -26,7 +26,7 @@ module Simple
         trap_signals
 
         loop do
-          sleep 1
+          sleep 5
         end
       end
 
@@ -52,6 +52,8 @@ module Simple
               @poller.poll do |messages|
                 handle messages, &block
               end
+
+              sleep 0.1
             end
           end
         end
@@ -66,10 +68,28 @@ module Simple
               unless @shutdown
                 block[message]
 
-                @poller.delete_messages [message]
+                @poller.delete_message(message)
               end
             rescue StandardError => e
-             p e.message
+             p "[SimpleSQS] Error occured: #{e.message}"
+             receive_count = message.attributes['ApproximateReceiveCount'].to_i
+
+             timeout = case receive_count
+             when 1
+               30
+             when 2..3
+               receive_count * 60
+             else
+               receive_count * 180
+             end
+
+             puts "[SimpleSQS] Change visibility: #{timeout}"
+             begin
+               @poller.change_message_visibility_timeout(message, timeout)
+             rescue StandardError => e
+               puts "[SimpleSQS] Change visibility failed: #{e.message}"
+             end
+
              raise e
            end
           end
