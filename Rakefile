@@ -3,10 +3,10 @@ require "bundler/gem_tasks"
 require 'simple/sqs'
 require 'simple/sqs/worker'
 
-Aws.config[:region] = 'us-west-2'
+Aws.config[:region] = 'eu-west-2'
 Aws.config[:credentials] = Aws::Credentials.new(
-  'AKIAJ7NYXYRTMBLJDXXA',
-  'seg6igHzT08bYO6TNcQxP2ws7wH4bobbBUDVMUwC'
+  'KEY',
+  'SECRET'
 )
 
 task :default do
